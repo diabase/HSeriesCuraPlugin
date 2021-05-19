@@ -54,6 +54,9 @@ class extension(Script):
 
                     if "M82" in line:
                         line = ''  # This simply deletes all lines containing M82
+                        
+                    if "M109" in line:  # This comments out all lines with M109 commands
+                        line = "".join([';', line])
 
                     if "G10 P" in line:
 
