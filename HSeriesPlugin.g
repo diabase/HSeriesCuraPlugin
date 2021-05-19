@@ -55,10 +55,10 @@ class extension(Script):
                     if "M82" in line:
                         line = ''  # This simply deletes all lines containing M82
                         
-                    if "M109" in line:  # This comments out all lines with M109 commands
+                    elif "M109" in line:  # This comments out all lines with M109 commands
                         line = "".join([';', line])
 
-                    if "G10 P" in line:
+                    elif "G10 P" in line:
 
                         g10_number_values = self.get_number_from_string(line, "P")
                         g10_number_string = g10_number_values[0]
@@ -73,14 +73,14 @@ class extension(Script):
                         line = "".join([line[0:5], new_number_string,
                                         string_after_number])  # Replacing the line with the new version where one is added to the number after P
 
-                    if "M104 T" in line:
+                    elif "M104 T" in line:
                         m104_t_number_values = self.get_number_from_string(line, "T")
                         m104_s_number_values = self.get_number_from_string(line, "S")
 
                         line = "".join(["G10 P", str(int(m104_t_number_values[0]) + 1), " S", m104_s_number_values[
                             0], " R", str(int(m104_s_number_values[0]) - 50), '\n'])
 
-                    if 'T' in line:  # All remaining lines with T# will be removed completely.
+                    elif 'T' in line:  # All remaining lines with T# will be removed completely.
                         for i in range(0, len(line) - 1):
                             if line[i] == 'T' and line[i + 1].isdigit():
                                 line = ''
