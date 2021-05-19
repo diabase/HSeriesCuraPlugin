@@ -1,7 +1,7 @@
 # Diabase Engineering H-Series Cura Extension
 
 ## Functionality
-This is a Python-based post-processing script that can be installed and run with Cura 4.9 and above. This extension modifies G-Code that is outputted by cura to allow it to be used by a Diabase Engineering H-Series machine.
+This is a Python-based post-processing script that can be installed and run with Cura 4.9 and above. This extension modifies G-Code that is outputted by Cura to allow it to be used by a Diabase Engineering H-Series machine.
 
 ### Current Functions:
 * Deletes the opening T# commands
@@ -12,13 +12,26 @@ This is a Python-based post-processing script that can be installed and run with
 * Comments out all M109 commands
 
 ### Future Functions
-* Remove post-toolchange Retraction
-* Replace post-toolchange Extrusions with “G11”
+* Remove post-tool-change Retraction
+* Replace post-tool-change Extrusions with “G11”
 * Replace final retraction with “G10”
-* Swap XY move with Z move after toolchange.
+* Swap XY move with Z move after tool-change.
 * Pre-heat tools before use
 
-## Instalation
-Download the .py file directly, then save it. 
+## Instalation Instructions
+* Download the HSeriesPost.py file directly, then save it. 
+* Open Cura(version 4.9 or later)
+* Click the "Help" menu item on the far right-hand side of the top toolbar.
+* Click "Show Configuration Folder".
+* Locate the folder called "scripts", and open it. If there is no folder with this name, create one in the configuration folder.
+* Place HSeriesPost.py into the scripts folder.
+* Restart Cura.
 
 ## Instructions for use
+* Click "Extensions" in the top toolbar
+* Click "Post Processing"
+* Click "Modify G-Code"
+* Underneath the heading "Post Processing Scripts", locate and click "Add a script"
+* Locate and click "Diabase Post Processor" in the dropdown
+* Check desired settings in the right panel, then close the window.
+* The script should now process the G-Codes produced by Cura. 
