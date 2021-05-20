@@ -10,11 +10,11 @@ This is a Python-based post-processing script that can be installed and run with
 * Replaces M104 T# S$$$ commands with G10 P(#+1) S$$$ R($$$-50) commands
 * Removes all remaining T# commands
 * Comments out all M109 commands
-
-### Future Functions
 * Remove post-tool-change Retraction
 * Replace post-tool-change Makeup with “G11”
 * Replace pre-tool-change retraction with “G10”
+
+### Future Functions
 * Swap XY move with Z move after tool-change.
 * Pre-heat tools before use
 
