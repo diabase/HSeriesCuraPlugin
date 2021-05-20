@@ -45,7 +45,7 @@ class HSeriesPost(Script):
         return [number, int_length]
 
     def execute(self, data):
-        new_data, new_layer = [], ''
+        new_data, new_layer = [], []
         if self.getSettingValueByKey("opening_lines"):
             for layer_number, layer in enumerate(
                     data):  # Big loop to iterate through all layers
@@ -87,12 +87,12 @@ class HSeriesPost(Script):
                                 break
 
                     if line != "" and line != "\n" and line != " ":
-                        new_layer += line
-                        new_layer += "\n"
+                        new_layer.append(line)
 
-            new_data.append(new_layer)
+            new_data.append('\n'.join([str(elem) for elem in new_layer]))
 
         if self.getSettingValueByKey("preheat"):
             pass
 
         return new_data
+
