@@ -45,12 +45,20 @@ class HSeriesPost(Script):
         return [number, int_length]
 
     def execute(self, data):
-        new_data, new_layer = [], []
+        new_data, new_layer, looking_for_retraction, looking_for_extrusion, found_extrusion = [], [], False, False, False
         if self.getSettingValueByKey("opening_lines"):
             for layer_number, layer in enumerate(
                     data):  # Big loop to iterate through all layers
                 lines_in_layer = list(data[layer_number].split("\n"))
                 for line in lines_in_layer:  # Loop to move through every line in each layer
+
+                    if ";Extruder " in line and line[len(line)-1].isdigit():
+                        looking_for_retraction = True
+                        looking_for_extrusion = True
+
+                    if ";TYPE" in line and looking_for_extrusion:
+                        looking_for_extrusion = False
+                        found_extrusion = True
 
                     if "M82" in line:
                         line = ''  # This simply deletes all lines containing M82
@@ -86,11 +94,19 @@ class HSeriesPost(Script):
                                 line = ''
                                 break
 
-                    if ";Extruder end code" in line:
+                    elif ";Extruder end code" in line:
                         if len(new_layer) >= 3:
                             new_layer[len(new_layer) - 2] = "".join(['G10', new_layer[len(new_layer) - 2][2:],'; Edited from G1 to G10'])
                         else:
                             line = ";LAYER PROCESSING ERROR"
+
+                    elif "G1 " in line and looking_for_retraction:
+                        line = "".join(['; Retraction Line Removed(', line, ')'])
+                        looking_for_retraction = False
+
+                    elif "G1 " in line and found_extrusion:
+                        line = "".join(['G11', line[2:],'; Edited from G1 to G11'])
+                        found_extrusion = False
 
                     if line != "" and line != "\n" and line != " ":
                         new_layer.append(line)
