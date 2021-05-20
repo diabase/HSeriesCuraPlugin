@@ -18,7 +18,7 @@ This is a Python-based post-processing script that can be installed and run with
 * Swap XY move with Z move after tool-change.
 * Pre-heat tools before use
 
-## Instal.ation Instructions
+## Instalation Instructions
 * Download the HSeriesPost.py file directly, then save it. 
 * Open Cura(version 4.9 or later)
 * Click the "Help" menu item on the far right-hand side of the top toolbar.
@@ -35,3 +35,6 @@ This is a Python-based post-processing script that can be installed and run with
 * Locate and click "Diabase Post Processor" in the dropdown
 * Check desired settings in the right panel, then close the window.
 * The script should now process the G-Codes produced by Cura. 
+
+## Known Bugs/issues
+* None as of now
