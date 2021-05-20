@@ -78,13 +78,19 @@ class HSeriesPost(Script):
                         m104_s_number_values = self.get_number_from_string(line, "S")
 
                         line = "".join(["G10 P", str(int(m104_t_number_values[0]) + 1), " S", m104_s_number_values[
-                            0], " R", str(int(m104_s_number_values[0]) - 50), '\n'])
+                            0], " R", str(int(m104_s_number_values[0]) - 50)])
 
                     elif 'T' in line:  # All remaining lines with T# will be removed completely.
                         for i in range(0, len(line) - 1):
                             if line[i] == 'T' and line[i + 1].isdigit():
                                 line = ''
                                 break
+
+                    if ";Extruder end code" in line:
+                        if len(new_layer) >= 3:
+                            new_layer[len(new_layer) - 2] = "".join(['G10', new_layer[len(new_layer) - 2][2:],'; Edited from G1 to G10'])
+                        else:
+                            line = ";LAYER PROCESSING ERROR"
 
                     if line != "" and line != "\n" and line != " ":
                         new_layer.append(line)
