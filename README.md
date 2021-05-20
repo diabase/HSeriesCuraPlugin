@@ -13,12 +13,12 @@ This is a Python-based post-processing script that can be installed and run with
 
 ### Future Functions
 * Remove post-tool-change Retraction
-* Replace post-tool-change Extrusions with “G11”
-* Replace final retraction with “G10”
+* Replace post-tool-change Makeup with “G11”
+* Replace pre-tool-change retraction with “G10”
 * Swap XY move with Z move after tool-change.
 * Pre-heat tools before use
 
-## Instalation Instructions
+## Instal.ation Instructions
 * Download the HSeriesPost.py file directly, then save it. 
 * Open Cura(version 4.9 or later)
 * Click the "Help" menu item on the far right-hand side of the top toolbar.
