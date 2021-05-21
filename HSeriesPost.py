@@ -45,7 +45,7 @@ class HSeriesPost(Script):
         return [number, int_length]
 
     def execute(self, data):
-        new_data, new_layer, looking_for_retraction, looking_for_extrusion, found_extrusion, looking_for_swap, found_swap, swap_value = [], [], False, False, False, False, False, ""
+        new_data, new_layer, looking_for_retraction, looking_for_extrusion, found_extrusion, looking_for_swap, found_swap, first_tool, swap_value = [], [], False, False, False, False, False, True, ""
         if self.getSettingValueByKey("opening_lines"):
             for layer_number, layer in enumerate(
                     data):  # Big loop to iterate through all layers
@@ -56,6 +56,14 @@ class HSeriesPost(Script):
                         looking_for_retraction = True
                         looking_for_extrusion = True
                         looking_for_swap = True
+
+                        if self.getSettingValueByKey("preheat"):
+                            if not first_tool:
+                                if len(new_layer) >= 10:
+                                    new_layer.insert(len(new_layer)-11, "".join(["M563 P", str(int(line[len(line) - 1]) +1), " A2 ; Pre-heating tool"]))
+                                else:
+                                    new_layer.append(";LAYER PROCESSING ERROR(Pre-Heating)")
+                            first_tool = False
 
                     if ";TYPE" in line and looking_for_extrusion:
                         looking_for_extrusion = False
@@ -101,7 +109,7 @@ class HSeriesPost(Script):
                             new_layer[len(new_layer) - 2] = "".join(
                                 ['G10', new_layer[len(new_layer) - 2][2:], '; Edited from G1 to G10'])
                         else:
-                            line = ";LAYER PROCESSING ERROR"
+                            new_layer.append(";LAYER PROCESSING ERROR(editing G1 to G10)")
 
                     elif "G1 " in line and looking_for_retraction:
                         line = "".join(['; Retraction Line Removed(', line, ')'])
@@ -128,7 +136,7 @@ class HSeriesPost(Script):
                             line = " ".join(
                                 [swap_value, ";Swapped"])
                         else:
-                            line = ";LAYER PROCESSING ERROR"
+                            new_layer.append(";LAYER PROCESSING ERROR(Swapping)")
                         swap_value = ''
                         found_swap = False
 
@@ -136,8 +144,5 @@ class HSeriesPost(Script):
                         new_layer.append(line)
 
             new_data.append('\n'.join([str(elem) for elem in new_layer]))
-
-        if self.getSettingValueByKey("preheat"):
-            pass
 
         return new_data
