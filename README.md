@@ -13,9 +13,9 @@ This is a Python-based post-processing script that can be installed and run with
 * Remove post-tool-change Retraction
 * Replace post-tool-change Makeup with “G11”
 * Replace pre-tool-change retraction with “G10”
+* Swap XY move with Z move after tool-change.
 
 ### Future Functions
-* Swap XY move with Z move after tool-change.
 * Pre-heat tools before use
 
 ## Instalation Instructions
