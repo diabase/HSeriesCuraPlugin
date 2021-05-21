@@ -37,4 +37,4 @@ This is a Python-based post-processing script that can be installed and run with
 * The script should now process the G-Codes produced by Cura. 
 
 ## Known Bugs/issues
-* None as of now
+* In theory, a perfect layer split could cause some functions in two to break. Based on where I have seen layer breaks, it seems like a layer break in this place would be impossible, but there would be no way to be sure without a much larger sample size. If this were to happen, a comment reading ";LAYER PROCESSING ERROR" Would be added in. As I said, this seems impossible. 
