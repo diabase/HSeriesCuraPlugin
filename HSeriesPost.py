@@ -45,16 +45,17 @@ class HSeriesPost(Script):
         return [number, int_length]
 
     def execute(self, data):
-        new_data, new_layer, looking_for_retraction, looking_for_extrusion, found_extrusion = [], [], False, False, False
+        new_data, new_layer, looking_for_retraction, looking_for_extrusion, found_extrusion, looking_for_swap, found_swap, swap_value = [], [], False, False, False, False, False, ""
         if self.getSettingValueByKey("opening_lines"):
             for layer_number, layer in enumerate(
                     data):  # Big loop to iterate through all layers
                 lines_in_layer = list(data[layer_number].split("\n"))
                 for line in lines_in_layer:  # Loop to move through every line in each layer
 
-                    if ";Extruder " in line and line[len(line)-1].isdigit():
+                    if ";Extruder " in line and line[len(line) - 1].isdigit():
                         looking_for_retraction = True
                         looking_for_extrusion = True
+                        looking_for_swap = True
 
                     if ";TYPE" in line and looking_for_extrusion:
                         looking_for_extrusion = False
@@ -74,9 +75,10 @@ class HSeriesPost(Script):
                         new_number_string = str(int(g10_number_string) + 1)
                         string_after_number = line[5 + g10_number_length:len(line)]
                         if " ".join([" Set tool", g10_number_string]) in string_after_number:
-                            string_after_number = string_after_number.replace(" ".join([" Set tool", g10_number_string]),
-                                                                              " ".join([" Set tool", str(int(
-                                                                                  g10_number_string) + 1)]))  # This makes sure the increment is made in the comments aswell
+                            string_after_number = string_after_number.replace(
+                                " ".join([" Set tool", g10_number_string]),
+                                " ".join([" Set tool", str(int(
+                                    g10_number_string) + 1)]))  # This makes sure the increment is made in the comments aswell
 
                         line = "".join([line[0:5], new_number_string,
                                         string_after_number])  # Replacing the line with the new version where one is added to the number after P
@@ -96,7 +98,8 @@ class HSeriesPost(Script):
 
                     elif ";Extruder end code" in line:
                         if len(new_layer) >= 3:
-                            new_layer[len(new_layer) - 2] = "".join(['G10', new_layer[len(new_layer) - 2][2:],'; Edited from G1 to G10'])
+                            new_layer[len(new_layer) - 2] = "".join(
+                                ['G10', new_layer[len(new_layer) - 2][2:], '; Edited from G1 to G10'])
                         else:
                             line = ";LAYER PROCESSING ERROR"
 
@@ -105,8 +108,29 @@ class HSeriesPost(Script):
                         looking_for_retraction = False
 
                     elif "G1 " in line and found_extrusion:
-                        line = "".join(['G11', line[2:],'; Edited from G1 to G11'])
+                        line = "".join(['G11', line[2:], '; Edited from G1 to G11'])
                         found_extrusion = False
+
+                    elif (looking_for_swap or found_swap) and " X" in line and " Y" in line and " Z" in line:
+                        swap_value = ''
+                        looking_for_swap = False
+                        found_swap = False
+
+                    elif looking_for_swap and "G1" in line and " Z" in line:
+                        swap_value = line
+                        looking_for_swap = False
+                        found_swap = True
+
+                    elif found_swap and " X" in line and " Y" in line :
+                        if len(new_layer) >= 3:
+                            new_layer[len(new_layer) - 2] = " ".join(
+                                [line, ";Swapped"])
+                            line = " ".join(
+                                [swap_value, ";Swapped"])
+                        else:
+                            line = ";LAYER PROCESSING ERROR"
+                        swap_value = ''
+                        found_swap = False
 
                     if line != "" and line != "\n" and line != " ":
                         new_layer.append(line)
@@ -117,4 +141,3 @@ class HSeriesPost(Script):
             pass
 
         return new_data
-
