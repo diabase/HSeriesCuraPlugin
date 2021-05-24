@@ -65,7 +65,7 @@ class HSeriesPost(Script):
                                 if len(new_layer) >= 10:  # This next section checks if there are at least 10 lines to place the pre-heat line back
                                     new_layer.insert(len(new_layer) - 11, "".join(
                                         ["M563 P", str(int(line[len(line) - 1]) + 1), " A2 ; Pre-heating tool"]))
-                                else:  # If there are not 10 lines to place the preheat line back, it gets placed as far back as possible. 
+                                else:  # If there are not 10 lines to place the preheat line back, it gets placed as far back as possible.
                                     new_layer.insert(0, "".join(
                                         ["M563 P", str(int(line[len(line) - 1]) + 1), " A2 ; Pre-heating tool"]))
                             first_tool = False
@@ -91,7 +91,7 @@ class HSeriesPost(Script):
                             string_after_number = string_after_number.replace(
                                 " ".join([" Set tool", g10_number_string]),
                                 " ".join([" Set tool", str(int(
-                                    g10_number_string) + 1)]))  # This makes sure the increment is made in the comments aswell
+                                    g10_number_string) + 1)]))  # This makes sure the increment is made in the comments as well
 
                         line = "".join([line[0:5], new_number_string,
                                         string_after_number])  # Replacing the line with the new version where one is added to the number after P
@@ -116,11 +116,11 @@ class HSeriesPost(Script):
                         else:
                             new_layer.append(";LAYER PROCESSING ERROR(editing G1 to G10)")  # Error catching, hopefully will never print
 
-                    elif "G1 " in line and looking_for_retraction:  # Remove post-toolchange Retraction
+                    elif "G1 " in line and looking_for_retraction:  # Remove post-tool-change Retraction
                         line = "".join(['; Retraction Line Removed(', line, ')'])
                         looking_for_retraction = False
 
-                    elif "G1 " in line and found_extrusion:  # Replace post-toolchange Extrusions with “G11”
+                    elif "G1 " in line and found_extrusion:  # Replace post-tool-change Extrusions with “G11”
                         line = "".join(['G11', line[2:], '; Edited from G1 to G11'])
                         found_extrusion = False
 
@@ -134,7 +134,7 @@ class HSeriesPost(Script):
                         looking_for_swap = False
                         found_swap = True
 
-                    elif found_swap and " X" in line and " Y" in line:  # Complete the swap(wap XY move with Z move after toolchange)
+                    elif found_swap and " X" in line and " Y" in line:  # Complete the swap(wap XY move with Z move after tool-change)
                         if len(new_layer) >= 3:
                             new_layer[len(new_layer) - 2] = " ".join(
                                 [line, ";Swapped"])
