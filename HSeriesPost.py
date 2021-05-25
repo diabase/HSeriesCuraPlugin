@@ -67,7 +67,7 @@ class HSeriesPost(Script):
                                         ["M563 P", str(int(line[len(line) - 1]) + 1), " A2 ; Pre-heating tool"]))
                                 else:  # If there are not 10 lines to place the preheat line back, it gets placed as far back as possible.
                                     new_layer.insert(0, "".join(
-                                        ["M563 P", str(int(line[len(line) - 1]) + 1), " A2 ; Pre-heating tool"]))
+                                        ["M568 P", str(int(line[len(line)]) + 1), " A2 ; Pre-heating tool"]))
                             first_tool = False
 
                     if ";TYPE" in line and looking_for_extrusion:  # Once ";TYPE" is found, this sets a flag variable to true, indicating that we are looking to turn a G1 into a G11
