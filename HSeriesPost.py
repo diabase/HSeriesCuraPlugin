@@ -111,8 +111,7 @@ class HSeriesPost(Script):
 
                     elif ";Extruder end code" in line:  # Replace final retraction with “G10” (2 lines above ;Extruder end code)
                         if len(new_layer) >= 3:
-                            new_layer[len(new_layer) - 2] = "".join(
-                                ['G10', new_layer[len(new_layer) - 2][2:], '; Edited from G1 to G10'])
+                            new_layer[len(new_layer) - 2] = 'G10; Edited from G1 to G10'
                         else:
                             new_layer.append(";LAYER PROCESSING ERROR(editing G1 to G10)")  # Error catching, hopefully will never print
 
@@ -121,7 +120,7 @@ class HSeriesPost(Script):
                         looking_for_retraction = False
 
                     elif "G1 " in line and found_extrusion:  # Replace post-tool-change Extrusions with “G11”
-                        line = "".join(['G11', line[2:], '; Edited from G1 to G11'])
+                        line = 'G11; Edited from G1 to G11'
                         found_extrusion = False
 
                     elif (looking_for_swap or found_swap) and " X" in line and " Y" in line and " Z" in line:  # Catches case where no swap is needed
