@@ -79,7 +79,23 @@ class HSeriesPost(Script):
 
                     elif "M109" in line:  # This comments out all lines with M109 commands
                         line = "".join([';', line])
+                        
+                    elif "G10 P" in line:  # Change G10 P# to G10 P(#+1)
 
+                        g10_number_values = self.get_number_from_string(line, "P")
+                        g10_number_string = g10_number_values[0]
+                        g10_number_length = g10_number_values[1]
+                        new_number_string = str(int(g10_number_string) + 1)
+                        string_after_number = line[5 + g10_number_length:len(line)]
+                        if " ".join([" Set tool", g10_number_string]) in string_after_number:
+                            string_after_number = string_after_number.replace(
+                                " ".join([" Set tool", g10_number_string]),
+                                " ".join([" Set tool", str(int(
+                                    g10_number_string) + 1)]))  # This makes sure the increment is made in the comments as well
+
+                        line = "".join([line[0:5], new_number_string,
+                                        string_after_number])  # Replacing the line with the new version where one is added to the number after P
+                    
                     elif "M104 T" in line:  # Replace M104 T# S$$$ with G10 P(#+1) S$$$ R($$$-50)
                         m104_t_number_values = self.get_number_from_string(line, "T")
                         m104_s_number_values = self.get_number_from_string(line, "S")
@@ -95,7 +111,7 @@ class HSeriesPost(Script):
 
                     elif ";Extruder end code" in line:  # Replace final retraction with “G10” (2 lines above ;Extruder end code)
                         if len(new_layer) >= 3:
-                            new_layer[len(new_layer) - 2] = 'G10'
+                            new_layer[len(new_layer) - 2] = "G1 E{-{tools[{state.currentTool}].retraction.length}} F{tools[{state.currentTool}].retraction.speed*60}"
                         else:
                             new_layer.append(";LAYER PROCESSING ERROR(editing G1 to G10)")  # Error catching, hopefully will never print
 
@@ -104,7 +120,8 @@ class HSeriesPost(Script):
                         looking_for_retraction = False
 
                     elif "G1 " in line and found_extrusion:  # Replace post-tool-change Extrusions with “G11”
-                        line = 'G11'
+                        line = "G1 E{tools[{state.currentTool}].retraction.length + tools[{state.currentTool}].retraction.extraRestart} F{tools[{state.currentTool}].retraction.unretractSpeed*60}"
+
                         found_extrusion = False
 
                     elif (looking_for_swap or found_swap) and " X" in line and " Y" in line and " Z" in line:  # Catches case where no swap is needed
@@ -127,12 +144,6 @@ class HSeriesPost(Script):
                             new_layer.append(";LAYER PROCESSING ERROR(Swapping)")  # Error catching, hopefully will never print
                         swap_value = ''
                         found_swap = False
-
-                    if "G10" in line:  # Change G10 P# to G10 P(#+1)
-                        line = "G1 E{-{tools[{state.currentTool}].retraction.length}} F{tools[{state.currentTool}].retraction.speed*60}"
-
-                    elif "G11" in line:  # Change G10 P# to G10 P(#+1)
-                        line = "G1 E{tools[{state.currentTool}].retraction.length + tools[{state.currentTool}].retraction.extraRestart} F{tools[{state.currentTool}].retraction.unretractSpeed*60}"
 
                     if line != "" and line != "\n" and line != " ":  # Adds the edited line back to the layer if it is not blank
                         new_layer.append(line)
