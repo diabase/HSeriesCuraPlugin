@@ -16,7 +16,7 @@ This is a Python-based post-processing script that can be installed and run with
 * Swap XY move with Z move after tool-change.
 * Pre-heat tools before use
 
-## Instalation Instructions
+## Installation Instructions
 * Download the HSeriesPost.py file directly, then save it. 
 * Open Cura(version 4.9 or later)
 * Click the "Help" menu item on the far right-hand side of the top toolbar.
