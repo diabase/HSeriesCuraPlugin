@@ -1,3 +1,6 @@
+ # Author: Nick Colleran
+ # Company: Diabase Engineering, LLC
+
 from ..Script import Script
 
 
@@ -23,9 +26,10 @@ class HSeriesPost(Script):
                 "preheat":
                 {
                     "label": "Pre-heat Tools",
-                    "description": "EXPERIMENTAL - When enabled, this will(in theory) start to preheat tools before they are to be used to improve efficiency.",
-                    "type": "bool",
-                    "default_value": false
+                    "description": "(Experimental)This will start to preheat tools X lines before they are to be used to improve efficiency. Select 0 to disable, 10 is recommended.",
+                    "type": "int",
+                    "default_value": 10,
+                    "minimum_value": "0"
                 }
             }
         }"""
@@ -59,11 +63,11 @@ class HSeriesPost(Script):
                         looking_for_extrusion = True
                         looking_for_swap = True
 
-                        if self.getSettingValueByKey("preheat"):  # This places a preheat line 10 lines before the tool is used
+                        if self.getSettingValueByKey("preheat") != 0:
                             if not first_tool:  # It checks to make sure it is not the first tool.
                                 # If we try to preheat the first tool, it will try to place the preheat line before the file even starts.
-                                if len(new_layer) >= 10:  # This next section checks if there are at least 10 lines to place the pre-heat line back
-                                    new_layer.insert(len(new_layer) - 11, "".join(
+                                if len(new_layer) >= self.getSettingValueByKey("preheat"):  # This next section checks if there are at least 10 lines to place the pre-heat line back
+                                    new_layer.insert(len(new_layer) - self.getSettingValueByKey("preheat"), "".join(
                                         ["M568 P", str(int(line[len(line) - 1])), " A2 ; Pre-heating tool"]))
                                 else:  # If there are not 10 lines to place the preheat line back, it gets placed as far back as possible.
                                     new_layer.insert(0, "".join(
@@ -79,7 +83,7 @@ class HSeriesPost(Script):
 
                     elif "M109" in line:  # This comments out all lines with M109 commands
                         line = "".join([';', line])
-                        
+
                     elif "G10 P" in line:  # Change G10 P# to G10 P(#+1)
 
                         g10_number_values = self.get_number_from_string(line, "P")
@@ -95,7 +99,7 @@ class HSeriesPost(Script):
 
                         line = "".join([line[0:5], new_number_string,
                                         string_after_number])  # Replacing the line with the new version where one is added to the number after P
-                    
+
                     elif "M104 T" in line:  # Replace M104 T# S$$$ with G10 P(#+1) S$$$ R($$$-50)
                         m104_t_number_values = self.get_number_from_string(line, "T")
                         m104_s_number_values = self.get_number_from_string(line, "S")
