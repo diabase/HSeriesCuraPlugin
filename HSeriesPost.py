@@ -26,9 +26,9 @@ class HSeriesPost(Script):
                 "preheat":
                 {
                     "label": "Pre-heat Tools",
-                    "description": "(Experimental)This will start to preheat tools X lines before they are to be used to improve efficiency. Select 0 to disable, 10 is recommended.",
+                    "description": "This will start to preheat tools X lines before they are to be used to improve efficiency. Select 0 to disable.",
                     "type": "int",
-                    "default_value": 10,
+                    "default_value": 0,
                     "minimum_value": "0"
                 }
             }
@@ -124,7 +124,7 @@ class HSeriesPost(Script):
                         looking_for_retraction = False
 
                     elif "G1 " in line and found_extrusion:  # Replace post-tool-change Extrusions with “G11”
-                        line = "G1 E{tools[{state.currentTool}].retraction.length + tools[{state.currentTool}].retraction.extraRestart} F{tools[{state.currentTool}].retraction.unretractSpeed*60}"
+                        line = "G1 E{tools[{state.currentTool}].retraction.length} F{tools[{state.currentTool}].retraction.speed*60}"
 
                         found_extrusion = False
 
