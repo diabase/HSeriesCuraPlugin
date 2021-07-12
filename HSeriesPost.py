@@ -1,5 +1,5 @@
- # Author: Nick Colleran
- # Company: Diabase Engineering, LLC
+# Author: Nick Colleran
+# Company: Diabase Engineering, LLC
 
 from ..Script import Script
 
@@ -28,7 +28,7 @@ class HSeriesPost(Script):
                     "label": "Pre-heat Tools",
                     "description": "This will start to preheat tools X lines before they are to be used to improve efficiency. Select 0 to disable.",
                     "type": "int",
-                    "default_value": 0,
+                    "default_value": 20,
                     "minimum_value": "0"
                 }
             }
@@ -50,6 +50,7 @@ class HSeriesPost(Script):
 
     def execute(self, data):
         new_data, new_layer, looking_for_retraction, looking_for_extrusion, found_extrusion, looking_for_swap, found_swap, first_tool, swap_value = [], [], False, False, False, False, False, True, ""
+        last_T = -1
         if self.getSettingValueByKey("opening_lines"):
             for layer_number, layer in enumerate(
                     data):  # Big loop to iterate through all layers
@@ -66,7 +67,8 @@ class HSeriesPost(Script):
                         if self.getSettingValueByKey("preheat") != 0:
                             if not first_tool:  # It checks to make sure it is not the first tool.
                                 # If we try to preheat the first tool, it will try to place the preheat line before the file even starts.
-                                if len(new_layer) >= self.getSettingValueByKey("preheat"):  # This next section checks if there are at least 10 lines to place the pre-heat line back
+                                if len(new_layer) >= self.getSettingValueByKey(
+                                        "preheat"):  # This next section checks if there are at least 10 lines to place the pre-heat line back
                                     new_layer.insert(len(new_layer) - self.getSettingValueByKey("preheat"), "".join(
                                         ["M568 P", str(int(line[len(line) - 1])), " A2 ; Pre-heating tool"]))
                                 else:  # If there are not 10 lines to place the preheat line back, it gets placed as far back as possible.
@@ -83,6 +85,9 @@ class HSeriesPost(Script):
 
                     elif "M109" in line:  # This comments out all lines with M109 commands
                         line = "".join([';', line])
+                        if "G10" in new_layer[len(new_layer) - 1]:
+                            new_layer.insert(len(new_layer), "M568 P" + str(last_T) + " A2")
+                            last_T = -1
 
                     elif "G10 P" in line:  # Change G10 P# to G10 P(#+1)
 
@@ -110,14 +115,17 @@ class HSeriesPost(Script):
                     elif 'T' in line:  # All remaining lines with T# will be removed completely.
                         for i in range(0, len(line) - 1):
                             if line[i] == 'T' and line[i + 1].isdigit():
+                                last_T = int(line[i + 1]) + 1
                                 line = ''
                                 break
 
                     elif ";Extruder end code" in line:  # Replace final retraction with “G10” (2 lines above ;Extruder end code)
                         if len(new_layer) >= 3:
-                            new_layer[len(new_layer) - 2] = "G1 E{-{tools[{state.currentTool}].retraction.length}} F{tools[{state.currentTool}].retraction.speed*60}"
+                            new_layer[
+                                len(new_layer) - 2] = "G1 E{-{tools[{state.currentTool}].retraction.length}} F{tools[{state.currentTool}].retraction.speed*60}"
                         else:
-                            new_layer.append(";LAYER PROCESSING ERROR(editing G1 to G10)")  # Error catching, hopefully will never print
+                            new_layer.append(
+                                ";LAYER PROCESSING ERROR(editing G1 to G10)")  # Error catching, hopefully will never print
 
                     elif "G1 " in line and looking_for_retraction:  # Remove post-tool-change Retraction
                         line = "".join(['; Retraction Line Removed(', line, ')'])
@@ -128,7 +136,8 @@ class HSeriesPost(Script):
 
                         found_extrusion = False
 
-                    elif (looking_for_swap or found_swap) and " X" in line and " Y" in line and " Z" in line:  # Catches case where no swap is needed
+                    elif (
+                            looking_for_swap or found_swap) and " X" in line and " Y" in line and " Z" in line:  # Catches case where no swap is needed
                         swap_value = ''
                         looking_for_swap = False
                         found_swap = False
@@ -145,9 +154,16 @@ class HSeriesPost(Script):
                             line = " ".join(
                                 [swap_value, ";Swapped"])
                         else:
-                            new_layer.append(";LAYER PROCESSING ERROR(Swapping)")  # Error catching, hopefully will never print
+                            new_layer.append(
+                                ";LAYER PROCESSING ERROR(Swapping)")  # Error catching, hopefully will never print
                         swap_value = ''
                         found_swap = False
+
+                    elif "M104 S" in line:
+                        after_S = int(self.get_number_from_string(line, 'S')[0])
+                        after_R = after_S - 50
+                        if last_T != -1:
+                            line = "G10 P" + str(last_T) + " S" + str(after_S) + " R" + str(after_R)
 
                     if line != "" and line != "\n" and line != " ":  # Adds the edited line back to the layer if it is not blank
                         new_layer.append(line)
