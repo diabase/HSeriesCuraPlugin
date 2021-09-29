@@ -128,11 +128,17 @@ class HSeriesPost(Script):
                                 ";LAYER PROCESSING ERROR(editing G1 to G10)")  # Error catching, hopefully will never print
 
                     elif "G1 " in line and looking_for_retraction:  # Remove post-tool-change Retraction
+
                         line = "".join(['; Retraction Line Removed(', line, ')'])
                         looking_for_retraction = False
 
-                    elif "G1 " in line and found_extrusion:  # Replace post-tool-change Extrusions with “G11”
-                        line = "G1 E{tools[{state.currentTool}].retraction.length} F{tools[{state.currentTool}].retraction.speed*60}"
+                    elif "G1 " in line and found_extrusion:
+                        zLocation = 0
+                        for index in range(len(line)):
+                            if line[index] == 'Z':
+                                zLocation = index
+                                break
+                        line = "G1 E{tools[{state.currentTool}].retraction.length} F{tools[{state.currentTool}].retraction.speed*60} " + line[zLocation: len(line)]
 
                         found_extrusion = False
 
