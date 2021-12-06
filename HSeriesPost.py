@@ -136,7 +136,7 @@ class HSeriesPost(Script):
                         line = "G1 E{tools[{state.currentTool}].retraction.length} F{tools[{state.currentTool}].retraction.speed*60} ;" + line[zLocation: len(line)]
 
                         found_extrusion = False
-                    elif "G1 " in line and looking_for_retraction:  # Remove post-tool-change Retraction
+                    elif "G1 " in line and looking_for_retraction and "E" in line:  # Remove post-tool-change Retraction
 
                         line = "".join(['; Retraction Line Removed(', line, ')'])
                         looking_for_retraction = False
